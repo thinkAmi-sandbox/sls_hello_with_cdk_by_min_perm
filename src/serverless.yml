@@ -1,0 +1,39 @@
+service: hello-sls
+frameworkVersion: '2'
+
+# Serverless: Deprecation warning: Unresolved variable references will be communicated with a thrown error, starting from next major
+# More Info: https://www.serverless.com/framework/docs/deprecations/#VARIABLES_ERROR_ON_UNRESOLVED
+unresolvedVariablesNotificationMode: error
+
+provider:
+  name: aws
+  runtime: python3.8
+  lambdaHashingVersion: 20201221
+  region: ap-northeast-1
+  stage: development
+
+  # Serverless: Deprecation warning: Starting with next major version, API Gateway naming will be changed from "{stage}-{service}" to "{service}-{stage}".
+  #           Set "provider.apiGateway.shouldStartNameWithService" to "true" to adapt to the new behavior now.
+  #           More Info: https://www.serverless.com/framework/docs/deprecations/#AWS_API_GATEWAY_NAME_STARTING_WITH_SERVICE
+  apiGateway:
+    shouldStartNameWithService: true
+
+  # Serverless: Deprecation warning: Starting with version 3.0.0, following property will be replaced:
+  #   "provider.cfnRole" -> "provider.iam.deploymentRole"
+  #   More Info: https://www.serverless.com/framework/docs/deprecations/#PROVIDER_IAM_SETTINGS
+  iam:
+    deploymentRole: ${ssm:/hello-sls/CFn-Role~true}
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - http:
+          path: req
+          method: get
+          integration: lambda
+          request:
+            passThrough: WHEN_NO_MATCH
+            template:
+              application/json: null
+              application/x-www-form-urlencoded: null
